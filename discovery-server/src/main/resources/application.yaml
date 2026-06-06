@@ -1,3 +1,9 @@
 spring:
   application:
     name: discovery-server
+server:
+  port: 8761 # Puerto universal de netflix-eureka-server
+eureka:
+  client:
+    register-with-eureka: false # El servicio no se registrara en Eureka - Se le indica al servidor que no cree replicas
+    fetch-registry: false # El servicio no podra obtener el registro de servicios localmente - Se le indica al servidor que no intente actualizarse de una replica ya que esta no existe
