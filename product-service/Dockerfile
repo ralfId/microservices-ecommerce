@@ -10,4 +10,4 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar product.jar
 EXPOSE 8080
-ENTRYPOINT["java", "-jar", "product.jar"]
+ENTRYPOINT ["java", "-jar", "product.jar"]
