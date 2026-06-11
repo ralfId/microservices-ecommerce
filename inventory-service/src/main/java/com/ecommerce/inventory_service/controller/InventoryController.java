@@ -49,4 +49,10 @@ public class InventoryController {
         inventoryService.deleteInventory(id);
     }
 
+    @PutMapping("/reduce/{sku}")
+    @ResponseStatus(HttpStatus.OK)
+    public String reduceStock(@PathVariable String sku, @RequestParam Integer quantity) {
+        inventoryService.reduceStock(sku, quantity);
+        return "Stock Reducido";
+    }
 }
