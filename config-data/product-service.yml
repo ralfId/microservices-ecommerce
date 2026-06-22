@@ -1,0 +1,23 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+  mongodb:
+
+    # uri original de mongo para spring-boot
+    # uri: mongodb://root:password@localhost:27017/product-db?authSource=admin
+
+    # construye el uri desde la clase MongoConfig
+    host: localhost
+    port: 27017
+    database: product-db
+    username: root
+    password: password
+    authentication-database: admin
+  web:
+    error:
+      include-message: always
+      include-stacktrace: never
+
+server:
+  port: 8080
