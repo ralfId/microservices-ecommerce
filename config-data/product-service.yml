@@ -24,7 +24,7 @@ spring:
 
 app:
   maintenance:
-    message: "Sistema Operativo - Version 1.0.0"
+    message: "Sistema Operativo - Version 1.0.0 - TODAY"
 
 management:
   endpoints:

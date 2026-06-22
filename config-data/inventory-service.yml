@@ -17,3 +17,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+inventory:
+  allow-backorders: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,refresh"
