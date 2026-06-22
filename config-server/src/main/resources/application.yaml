@@ -5,8 +5,10 @@ spring:
     config:
       server:
         git:
-          uri: file:///C:/Aprendizaje/microservicios-java/java-rabbitmq/microservices-ecommerce/config-data/
+          uri: https://github.com/ralfId/microservices-ecommerce-config-data.git
           clone-on-start: true
           default-label: main
+          username: ${GITHUB_USER}
+          password: ${GITHUB_TOKEN}
 server:
   port: 8888
