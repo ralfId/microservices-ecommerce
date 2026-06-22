@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   threads:
     virtual:
@@ -19,5 +22,13 @@ spring:
       include-message: always
       include-stacktrace: never
 
-server:
-  port: 8080
+app:
+  maintenance:
+    message: "Sistema Operativo - Version 1.0.0"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,refresh"
+
