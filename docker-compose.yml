@@ -23,6 +23,7 @@ services:
       MYSQL_DATABASE: inventory-db
     volumes:
       - inventory_data:/var/lib/mysql
+
   order-db:
     image: postgres:16-alpine
     container_name: order-db
@@ -36,9 +37,38 @@ services:
     volumes:
       - order_data:/var/lib/postgresql/data
 
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: keycloak-db
+    #    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak-db
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: keycloak
+    command: start-dev # Modo desarrollo (rapido y sin HTTPS obligatorio)
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak-db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      # credenciales del super admin (para entrar a la consola inmediatamente)
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
 
 volumes:
   mongo_data:             # Declaramos el volumen persistente
   inventory_data:
   order_data:
+  keycloak_data:
