@@ -18,6 +18,12 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      # Configuración de SERVIDOR (Necesaria para validar entrada)
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:8080/realms/ecommerce-realm"
 
 eureka:
   client:

@@ -24,7 +24,9 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity serverHttpSecurity) {
         serverHttpSecurity.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
+
                         .pathMatchers("/eureka/**").permitAll()
+
                         .pathMatchers(HttpMethod.GET,"/api/v1/product/**").permitAll()
                         .pathMatchers("/api/v1/product/**").hasRole(Role.ADMIN.name())
 
@@ -32,7 +34,10 @@ public class SecurityConfig {
                         .pathMatchers("/api/v1/inventory/**").hasRole(Role.ADMIN.name())
 
                         .pathMatchers(HttpMethod.POST,"/api/v1/order").hasRole(Role.USER.name())
-                        .pathMatchers("/api/v1/order/**").hasRole(Role.ADMIN.name())
+                        .pathMatchers(HttpMethod.GET,"/api/v1/order").hasRole(Role.ADMIN.name())
+                        .pathMatchers(HttpMethod.GET,"/api/v1/order/byUser").hasAnyRole(Role.ADMIN.name(), Role.USER.name())
+                        .pathMatchers(HttpMethod.DELETE,"/api/v1/order/**").hasRole(Role.ADMIN.name())
+                        .pathMatchers(HttpMethod.PUT,"/api/v1/order/**").hasRole(Role.ADMIN.name())
 
                         .anyExchange().authenticated())
 

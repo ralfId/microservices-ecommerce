@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderRespDTO placeOrder(OrderReqDTO orderRequest) {
+    public OrderRespDTO placeOrder(OrderReqDTO orderRequest, String userId) {
 
         if (!ordersEnabled) {
             log.warn("Pedido Rechazado: Servicio deshabilitado por configuracion");
@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
         log.info("Colocando nueva orden...");
 
         Order newOrder = orderMapper.toOrder(orderRequest);
+        newOrder.setUserId(userId);
 
         for(var item : newOrder.getOrderLineItemsList()){
             String sku = item.getSku();
@@ -81,7 +82,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderRespDTO> getAllOrders() {
+    public List<OrderRespDTO> getAllOrders(boolean isAdmin) {
+        if(!isAdmin){
+            log.info("No es usuario administrador");
+            throw new IllegalArgumentException("No es usuario administrador");
+        }
+
         return orderRepository.findAll().stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
@@ -103,5 +109,14 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.deleteById(id);
         log.info("Orden eliminada. ID: {}", id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderRespDTO> getOrdersByUserId(String userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        return orders.stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
     }
 }
