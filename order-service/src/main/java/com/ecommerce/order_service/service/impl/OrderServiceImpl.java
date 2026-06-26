@@ -8,13 +8,14 @@ import com.ecommerce.order_service.model.Order;
 import com.ecommerce.order_service.repository.OrderRepository;
 import com.ecommerce.order_service.service.OrderService;
 import com.ecommerce.order_service.service.client.InventoryClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,26 +34,36 @@ public class OrderServiceImpl implements OrderService {
     @Value("${order.enabled:true}")
     private boolean ordersEnabled;
 
+
+
+    public OrderRespDTO fallbackMethod(OrderReqDTO orderRequest, String userId, Throwable throwable) {
+            log.error("Circuit breaker activo. Causa: {}", throwable.getMessage());
+            throw new RuntimeException("El servicio de ordenes no responde, intente mas tarde");
+    }
+
     @Override
     @Transactional
-    public OrderRespDTO placeOrder(OrderReqDTO orderRequest, String userId) {
+    @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
+    @Retry(name = "inventory")
+//    @TimeLimiter(name = "inventory") # Se deshabilita porque se solventa usando una Arquitectura Orientada a Eventos - RabbitMQ
+     public OrderRespDTO placeOrder(OrderReqDTO orderRequest, String userId) {
 
-        if (!ordersEnabled) {
-            log.warn("Pedido Rechazado: Servicio deshabilitado por configuracion");
-            throw new RuntimeException("Servicio en mantenimiento, intente mas tarde");
-        }
+           if (!ordersEnabled) {
+               log.warn("Pedido Rechazado: Servicio deshabilitado por configuracion");
+               throw new RuntimeException("Servicio en mantenimiento, intente mas tarde");
+           }
 
 
-        log.info("Colocando nueva orden...");
+           log.info("Colocando nueva orden...");
 
-        Order newOrder = orderMapper.toOrder(orderRequest);
-        newOrder.setUserId(userId);
+           Order newOrder = orderMapper.toOrder(orderRequest);
+           newOrder.setUserId(userId);
 
-        for(var item : newOrder.getOrderLineItemsList()){
-            String sku = item.getSku();
-            Integer quantity = item.getQuantity();
+           for(var item : newOrder.getOrderLineItemsList()){
+               String sku = item.getSku();
+               Integer quantity = item.getQuantity();
 
-            try {
+               try {
 //                webClientBuilder.build()
 //                        .put()
 //                        .uri("http://localhost:8081/api/v1/inventory/reduce/" + sku,
@@ -61,23 +72,23 @@ public class OrderServiceImpl implements OrderService {
 //                        .bodyToMono(String.class)
 //                        .block();
 
-                inventoryClient.reduceStock(sku, quantity);
+                   inventoryClient.reduceStock(sku, quantity);
 
 
-            }catch (Exception e){
-                log.error("Error al reducir stock para producto con sku {}: {}", sku, e.getMessage());
-                throw new IllegalArgumentException("No se pudo procesar la orden: Stock insuficiente o error de inventario");
-            }
-        }
+               }catch (Exception e){
+                   log.error("Error al reducir stock para producto con sku {}: {}", sku, e.getMessage());
+                   throw new IllegalArgumentException("No se pudo procesar la orden: Stock insuficiente o error de inventario");
+               }
+           }
 
 
-        newOrder.setOrderNumber(UUID.randomUUID().toString());
+           newOrder.setOrderNumber(UUID.randomUUID().toString());
 
-        Order savedOrder = orderRepository.save(newOrder);
+           Order savedOrder = orderRepository.save(newOrder);
 
-        log.info("Orden guardada con éxito. ID: {}", savedOrder.getId());
+           log.info("Orden guardada con éxito. ID: {}", savedOrder.getId());
 
-        return orderMapper.toOrderResponse(savedOrder);
+           return orderMapper.toOrderResponse(savedOrder);
     }
 
     @Override
