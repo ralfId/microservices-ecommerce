@@ -2,6 +2,7 @@ package com.ecommerce.order_service.service;
 
 import com.ecommerce.order_service.dto.OrderReqDTO;
 import com.ecommerce.order_service.dto.OrderRespDTO;
+import com.ecommerce.order_service.model.OrderStatus;
 
 import java.util.List;
 
@@ -11,4 +12,5 @@ public interface OrderService {
     OrderRespDTO getOrderById(Long id);                  // Read One
     void deleteOrder(Long id);                           // Delete
     List<OrderRespDTO> getOrdersByUserId(String userId); // Get by userId;
+    void updateOrderStatus(String orderNumber, OrderStatus orderStatus); // update status by orderNumber
 }

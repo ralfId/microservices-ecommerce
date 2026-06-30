@@ -27,7 +27,7 @@ eureka:
     prefer-ip-address: true
 
 inventory:
-  allow-backorders: true
+  allow-backorders: false
 
 management:
   endpoints:

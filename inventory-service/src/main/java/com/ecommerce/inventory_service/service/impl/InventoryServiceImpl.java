@@ -78,7 +78,7 @@ public class InventoryServiceImpl implements InventoryService {
                 );
 
         inventory.setSku(inventoryReqDTO.sku());
-        inventory.setQuantity(inventoryReqDTO.quantity());
+        inventory.setQuantity(inventoryReqDTO.quantity() + inventory.getQuantity());
 
         Inventory updatedInventory = inventoryRepository.save(inventory);
 
